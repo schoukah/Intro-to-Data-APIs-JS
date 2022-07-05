@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Coding Train: Data and APIs Project 1</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
+  </head>
+  <body>
+    <h1>Global Average Temperatures 1880-2018</h1>
+
+    <canvas id="myChart" width="400" height="200"></canvas>
+
+    <script>
+      // Data from: https://data.giss.nasa.gov/gistemp/
+      // Mean from:
+      // https://earthobservatory.nasa.gov/world-of-change/DecadalTemp
+
+      charIt();
+
+      async function getData() {
+        const response = await fetch("zonAnn.Ts+dSST.csv");
+        const data = await response.text();
+        //console.log(data);
+        const table = data.split("\n").slice(1);
+        //console.log(table);
+        const xs = [];
+        const ys = [];
+        table.forEach((row) => {
+          const cols = row.split(",");
+          const year = cols[0];
+          xs.push(year);
+          const temp = cols[1];
+          ys.push(parseFloat(temp) + 14);
+          console.log(year, temp);
+        });
+        return { xs, ys };
+      }
+
+      async function charIt() {
+        const data = await getData(); // wait for data to be fetched before creating chart!!
+        const ctx = document.getElementById("myChart").getContext("2d");
+        const myChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.xs,
+            datasets: [
+              {
+                label:
+                  "Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies (Land-Ocean Temperature Index, L-OTI) - Zonal annual means, 1880-present, updated through most recent complete year",
+                data: data.ys,
+                fill: false,
+                backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+                borderColor: ["rgba(255, 99, 132, 1)"],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                ticks: {
+                  callback: function (value, index, values) {
+                    return value + "°C";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
